@@ -1,0 +1,25 @@
+{
+  "info": {
+    "name": "Startup Roast Arena API",
+    "description": "Backend request collection. Set baseUrl, token, and ideaId collection variables.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:4000/api" },
+    { "key": "token", "value": "" },
+    { "key": "ideaId", "value": "" }
+  ],
+  "item": [
+    { "name": "Health", "request": { "method": "GET", "url": "{{baseUrl}}/health" } },
+    { "name": "Register", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"displayName\": \"Founder A\",\n  \"email\": \"founder@example.com\",\n  \"password\": \"strong-password-123\"\n}" }, "url": "{{baseUrl}}/auth/register" } },
+    { "name": "Login", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"email\": \"founder@example.com\",\n  \"password\": \"strong-password-123\"\n}" }, "url": "{{baseUrl}}/auth/login" } },
+    { "name": "Current user", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": "{{baseUrl}}/auth/me" } },
+    { "name": "Create idea", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" }], "body": { "mode": "raw", "raw": "{\n  \"title\": \"Smart Canteen\",\n  \"problem\": \"Students wait in long canteen queues.\",\n  \"solution\": \"An online food preorder system.\",\n  \"customer\": \"School and university students.\",\n  \"roastLevel\": \"medium\"\n}" }, "url": "{{baseUrl}}/ideas" } },
+    { "name": "Explore ideas", "request": { "method": "GET", "url": "{{baseUrl}}/ideas?page=1&limit=12" } },
+    { "name": "Idea detail", "request": { "method": "GET", "url": "{{baseUrl}}/ideas/{{ideaId}}" } },
+    { "name": "My ideas", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": "{{baseUrl}}/ideas/mine" } },
+    { "name": "Vote", "request": { "method": "POST", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": "{{baseUrl}}/ideas/{{ideaId}}/vote" } },
+    { "name": "Re-pitch", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" }], "body": { "mode": "raw", "raw": "{\n  \"problem\": \"Students cannot predict or avoid campus meal queues.\",\n  \"solution\": \"A preorder system with collection windows.\",\n  \"customer\": \"University students and canteen operators.\",\n  \"roastLevel\": \"medium\"\n}" }, "url": "{{baseUrl}}/ideas/{{ideaId}}/repitch" } },
+    { "name": "Leaderboard", "request": { "method": "GET", "url": "{{baseUrl}}/leaderboard" } }
+  ]
+}
