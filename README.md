@@ -75,7 +75,7 @@ The AI review service then calls Groq, validates its response, and stores only s
 | Node.js + Express | REST API server |
 | MongoDB + Mongoose | Database and schemas |
 | JWT + bcrypt | Authentication and password security |
-| Zod | Request and AI response validation |
+| Zod | AI response validation |
 | Groq SDK | Live AI investor feedback |
 | Helmet + CORS + rate limits | Basic API security |
 | Vitest + Supertest | Automated tests |

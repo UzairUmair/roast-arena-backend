@@ -39,7 +39,7 @@ export const register = async (req, res) => {
       });
     }
 
-    if (!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email.trim()) || email.trim().length > 254) {
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim()) || email.trim().length > 254) {
       return res.status(422).json({
         success: false,
         error: { code: 'VALIDATION_ERROR', message: 'Enter a valid email address.' },
