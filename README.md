@@ -59,7 +59,7 @@ For example, when a user creates an idea:
 POST /api/ideas
   → routes/ideaRoutes.js
   → controllers/ideaController.js
-  → services/ideas/ideaWriteService.js
+  → services/aiService.js
   → Idea, Version, and Review models
   → MongoDB
 ```
@@ -86,20 +86,17 @@ The AI review service then calls Groq, validates its response, and stores only s
 
 ```text
 src/
-├── config/       # environment setup, database connection, constants
+├── config/       # MongoDB connection and project constants
 ├── models/       # Mongoose schemas and MongoDB indexes
-├── routes/       # endpoint URLs and middleware order
-├── controllers/  # receives requests and sends responses
-├── services/     # main business logic
-│   ├── ai/       # Groq prompts, validation, retry, fallback logic
-│   ├── ideas/    # creating, reading, re-pitching, presenting, voting
-│   └── scoring/  # leaderboard calculations
-├── middleware/   # authentication, validation, rate limits, errors
-├── validation/   # Zod schemas
-├── utils/        # small reusable helpers
+├── routes/       # endpoint URLs
+├── controllers/  # request handling and responses
+├── middleware/   # JWT authentication and common errors
+├── services/     # Groq AI logic and leaderboard formula
 ├── app.js        # Express configuration and route mounting
-└── server.js     # server startup and graceful shutdown
+└── server.js     # server startup
 ```
+
+For a detailed Roman Urdu explanation of every folder, API flow, viva questions, and practice tasks, read [STUDENT_GUIDE.md](STUDENT_GUIDE.md).
 
 ---
 

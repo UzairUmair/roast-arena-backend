@@ -1,52 +1,60 @@
 import cors from 'cors';
 import express from 'express';
 import helmet from 'helmet';
-import { env } from './config/env.js';
-import { errorHandler, notFoundHandler } from './middleware/errorHandler.js';
-import { generalRateLimiter } from './middleware/rateLimiters.js';
-import { authRouter } from './routes/authRoutes.js';
-import { ideaRouter } from './routes/ideaRoutes.js';
-import { leaderboardRouter } from './routes/leaderboardRoutes.js';
-import { sendSuccess } from './utils/response.js';
+import rateLimit from 'express-rate-limit';
+import authRoutes from './routes/authRoutes.js';
+import ideaRoutes from './routes/ideaRoutes.js';
+import voteRoutes from './routes/voteRoutes.js';
+import leaderboardRoutes from './routes/leaderboardRoutes.js';
+import { errorHandler, notFound } from './middleware/errorMiddleware.js';
 
-function createCorsOptions() {
-  const allowedOrigins = env.FRONTEND_URL.split(',').map((origin) => origin.trim());
+const app = express();
 
-  return {
-    origin(origin, callback) {
-      const isServerToServerRequest = !origin;
-      const isAllowedFrontend = allowedOrigins.includes(origin);
-      return callback(null, isServerToServerRequest || isAllowedFrontend);
-    },
-    methods: ['GET', 'POST'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-  };
-}
+const allowedOrigins = (process.env.FRONTEND_URL || 'http://localhost:5173')
+  .split(',')
+  .map((origin) => origin.trim());
 
-export function createApp() {
-  const app = express();
-
-  // Application-wide security and parsing middleware.
-  app.disable('x-powered-by');
-  app.use(helmet());
-  app.use(cors(createCorsOptions()));
-  app.use(express.json({ limit: '20kb' }));
-  app.use(generalRateLimiter);
-
-  // API routes.
-  app.get('/api/health', (_req, res) => {
-    return sendSuccess(res, {
-      status: 'ok',
-      service: 'startup-roast-arena-api',
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 300,
+  standardHeaders: true,
+  legacyHeaders: false,
+  handler: (req, res) => {
+    res.status(429).json({
+      success: false,
+      error: { code: 'RATE_LIMITED', message: 'Too many requests. Please try again later.' },
     });
+  },
+});
+
+app.use(helmet());
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+
+    return callback(null, false);
+  },
+  methods: ['GET', 'POST'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+}));
+app.use(express.json({ limit: '20kb' }));
+app.use(limiter);
+
+app.get('/api/health', (req, res) => {
+  res.status(200).json({
+    success: true,
+    data: { status: 'ok', service: 'startup-roast-arena-api' },
   });
-  app.use('/api/auth', authRouter);
-  app.use('/api/ideas', ideaRouter);
-  app.use('/api/leaderboard', leaderboardRouter);
+});
 
-  // Error middleware must always be registered after the routes.
-  app.use(notFoundHandler);
-  app.use(errorHandler);
+app.use('/api/auth', authRoutes);
+app.use('/api/ideas', ideaRoutes);
+app.use('/api/ideas', voteRoutes);
+app.use('/api/leaderboard', leaderboardRoutes);
 
-  return app;
-}
+app.use(notFound);
+app.use(errorHandler);
+
+export default app;

@@ -1,30 +1,24 @@
-import { Router } from 'express';
+import express from 'express';
 import {
-  create,
-  detail,
-  list,
-  mine,
-  repitch,
-  versions,
-  vote,
+  createIdea,
+  getIdeaById,
+  getIdeas,
+  getIdeaVersions,
+  getMyIdeas,
+  repitchIdea,
 } from '../controllers/ideaController.js';
-import { optionalAuth, requireAuth } from '../middleware/auth.js';
-import { validate } from '../middleware/validate.js';
-import {
-  paginationSchema,
-  pitchSchema,
-  repitchSchema,
-} from '../validation/schemas.js';
+import { optionalProtect, protect } from '../middleware/authMiddleware.js';
 
-export const ideaRouter = Router();
+const router = express.Router();
 
-ideaRouter.get('/', validate(paginationSchema, 'query'), list);
-ideaRouter.post('/', requireAuth, validate(pitchSchema), create);
+router.get('/', getIdeas);
+router.post('/', protect, createIdea);
 
-// Keep this specific route before '/:id', otherwise Express treats "mine" as an ID.
-ideaRouter.get('/mine', requireAuth, mine);
+// This must come before '/:id', or Express will think "mine" is an idea ID.
+router.get('/mine', protect, getMyIdeas);
 
-ideaRouter.get('/:id', optionalAuth, detail);
-ideaRouter.get('/:id/versions', versions);
-ideaRouter.post('/:id/repitch', requireAuth, validate(repitchSchema), repitch);
-ideaRouter.post('/:id/vote', requireAuth, vote);
+router.get('/:id', optionalProtect, getIdeaById);
+router.get('/:id/versions', getIdeaVersions);
+router.post('/:id/repitch', protect, repitchIdea);
+
+export default router;

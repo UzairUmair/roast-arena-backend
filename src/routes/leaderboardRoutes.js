@@ -1,5 +1,8 @@
-import { Router } from 'express';
-import { listLeaderboard } from '../controllers/leaderboardController.js';
+import express from 'express';
+import { getLeaderboard } from '../controllers/leaderboardController.js';
 
-export const leaderboardRouter = Router();
-leaderboardRouter.get('/', listLeaderboard);
+const router = express.Router();
+
+router.get('/', getLeaderboard);
+
+export default router;

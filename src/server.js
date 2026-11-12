@@ -1,22 +1,29 @@
-import { createApp } from './app.js';
-import { connectDatabase, disconnectDatabase } from './config/database.js';
-import { assertRuntimeSecrets, env } from './config/env.js';
+import 'dotenv/config';
+import app from './app.js';
+import { connectDB, disconnectDB } from './config/db.js';
 
-assertRuntimeSecrets();
-await connectDatabase(env.MONGODB_URI);
+const port = process.env.PORT || 4000;
 
-const app = createApp();
-const server = app.listen(env.PORT, () => {
-  console.log(`Startup Roast Arena API listening on port ${env.PORT}.`);
-});
-
-async function shutdown(signal) {
-  console.log(`${signal} received; closing server.`);
-  server.close(async () => {
-    await disconnectDatabase();
-    process.exit(0);
-  });
+if (!process.env.MONGODB_URI || !process.env.JWT_SECRET) {
+  console.log('MONGODB_URI and JWT_SECRET are required in .env');
+  process.exit(1);
 }
 
-process.once('SIGINT', () => shutdown('SIGINT'));
-process.once('SIGTERM', () => shutdown('SIGTERM'));
+if (process.env.MOCK_AI !== 'true' && (!process.env.GROQ_API_KEY || !process.env.GROQ_MODEL)) {
+  console.log('Set GROQ_API_KEY and GROQ_MODEL, or set MOCK_AI=true for demo mode.');
+  process.exit(1);
+}
+
+await connectDB();
+
+const server = app.listen(port, () => {
+  console.log(`Server is running on port ${port}`);
+});
+
+const closeServer = async () => {
+  await disconnectDB();
+  server.close(() => process.exit(0));
+};
+
+process.on('SIGINT', closeServer);
+process.on('SIGTERM', closeServer);
